@@ -7,6 +7,7 @@ import { Heart, ShoppingCart, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useWishlist } from "@/lib/wishlist-context"
 import { useCart } from "@/lib/cart-context"
+import RouteProtection from "@/components/route-protection"
 
 export default function WishlistPage() {
   const { items, removeItem, clearWishlist } = useWishlist()
@@ -23,27 +24,28 @@ export default function WishlistPage() {
   }
 
   return (
-    <>
-      <Header />
-      <main className="min-h-screen py-12">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-4xl font-bold mb-2">My Wishlist</h1>
-              <p className="text-muted-foreground">
-                {items.length} {items.length === 1 ? "item" : "items"} in your wishlist
-              </p>
+    <RouteProtection requireUser={true}>
+      <>
+        <Header />
+        <main className="min-h-screen py-12">
+          <div className="container mx-auto px-4 max-w-6xl">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-4xl font-bold mb-2">My Wishlist</h1>
+                <p className="text-muted-foreground">
+                  {items.length} {items.length === 1 ? "item" : "items"} in your wishlist
+                </p>
+              </div>
+              {items.length > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={clearWishlist}
+                  className="text-destructive hover:text-destructive"
+                >
+                  Clear All
+                </Button>
+              )}
             </div>
-            {items.length > 0 && (
-              <Button
-                variant="outline"
-                onClick={clearWishlist}
-                className="text-destructive hover:text-destructive"
-              >
-                Clear All
-              </Button>
-            )}
-          </div>
 
           {items.length === 0 ? (
             <div className="text-center py-16">
@@ -104,5 +106,6 @@ export default function WishlistPage() {
       </main>
       <Footer />
     </>
+    </RouteProtection>
   )
 }

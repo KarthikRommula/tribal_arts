@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Trash2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useCart } from "@/lib/cart-context"
+import RouteProtection from "@/components/route-protection"
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, clearCart, total } = useCart()
@@ -16,14 +17,15 @@ export default function CartPage() {
   const finalTotal = subtotal + shipping + tax
 
   return (
-    <>
-      <Header />
-      <main className="min-h-screen">
-        <div className="bg-secondary/10 py-8">
-          <div className="max-w-7xl mx-auto px-3">
-            <h1 className="text-3xl font-bold">Shopping Cart</h1>
+    <RouteProtection requireUser={true}>
+      <>
+        <Header />
+        <main className="min-h-screen">
+          <div className="bg-secondary/10 py-8">
+            <div className="max-w-7xl mx-auto px-3">
+              <h1 className="text-3xl font-bold">Shopping Cart</h1>
+            </div>
           </div>
-        </div>
 
         <div className="max-w-7xl mx-auto px-3 py-12">
           {items.length === 0 ? (
@@ -144,5 +146,6 @@ export default function CartPage() {
       </main>
       <Footer />
     </>
+    </RouteProtection>
   )
 }

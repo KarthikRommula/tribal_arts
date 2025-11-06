@@ -33,15 +33,34 @@ export function CartProvider({ children, userId }: { children: React.ReactNode; 
     const loadCart = async () => {
       setIsLoading(true)
       if (userId) {
-        // User is logged in - load from DB only
+        // User is logged in - load from DB
         try {
           const response = await fetch(`/api/cart?userId=${userId}`)
           const data = await response.json()
-          if (data.success) {
+          if (data.success && data.data.length > 0) {
+            // Cart exists in DB
             setItems(data.data)
           } else {
-            // If no cart in DB, start with empty cart
-            setItems([])
+            // No cart in DB, check if there's a guest cart to transfer
+            const savedCart = localStorage.getItem("guest_cart")
+            if (savedCart) {
+              try {
+                const guestCart = JSON.parse(savedCart)
+                if (guestCart.length > 0) {
+                  // Transfer guest cart to DB
+                  setItems(guestCart)
+                  // The sync effect will save it to DB
+                  localStorage.removeItem("guest_cart")
+                } else {
+                  setItems([])
+                }
+              } catch (error) {
+                console.error("Error parsing guest cart:", error)
+                setItems([])
+              }
+            } else {
+              setItems([])
+            }
           }
         } catch (error) {
           console.error("Error loading cart from DB:", error)

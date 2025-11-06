@@ -15,10 +15,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { email: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ email: string }> }) {
   try {
+    const { email } = await params
     const body = await request.json()
-    const result = await updateUserProfile(params.email, body)
+    const result = await updateUserProfile(email, body)
     return NextResponse.json({ success: true, data: result })
   } catch (error) {
     console.error("Error updating user:", error)

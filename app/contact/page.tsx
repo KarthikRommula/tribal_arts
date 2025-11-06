@@ -1,10 +1,68 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/lib/auth-context"
 
 export default function ContactPage() {
+  const { user } = useAuth()
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
+
+  // Pre-fill form data when user is logged in
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.name || prev.name,
+        email: user.email || prev.email,
+      }))
+    }
+  }, [user])
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitStatus("idle")
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          userId: user?._id || null,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setSubmitStatus("success")
+        setFormData({ name: "", email: "", subject: "", message: "" })
+      } else {
+        setSubmitStatus("error")
+      }
+    } catch (error) {
+      console.error("Error submitting contact form:", error)
+      setSubmitStatus("error")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
   return (
     <>
       <Header />
@@ -57,29 +115,66 @@ export default function ContactPage() {
 
             <div className="bg-card border border-border rounded-lg p-8">
               <h2 className="text-2xl font-semibold mb-6">Send us a Message</h2>
-              <form className="space-y-4">
+              
+              {submitStatus === "success" && (
+                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
+                  Thank you for your message! We'll get back to you soon.
+                </div>
+              )}
+              
+              {submitStatus === "error" && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+                  Sorry, there was an error sending your message. Please try again.
+                </div>
+              )}
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold mb-2">Name</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                    disabled={!!user}
+                    className={`w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary ${
+                      user ? 'bg-gray-50 cursor-not-allowed' : ''
+                    }`}
                     placeholder="Your name"
                   />
+                  {user && (
+                    <p className="text-xs text-gray-500 mt-1">Using your account name</p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold mb-2">Email</label>
                   <input
                     type="email"
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    disabled={!!user}
+                    className={`w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary ${
+                      user ? 'bg-gray-50 cursor-not-allowed' : ''
+                    }`}
                     placeholder="your@email.com"
                   />
+                  {user && (
+                    <p className="text-xs text-gray-500 mt-1">Using your account email</p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold mb-2">Subject</label>
                   <input
                     type="text"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
+                    required
                     className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder="How can we help?"
                   />
@@ -88,14 +183,22 @@ export default function ContactPage() {
                 <div>
                   <label className="block text-sm font-semibold mb-2">Message</label>
                   <textarea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
                     rows={5}
+                    required
                     className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                     placeholder="Tell us more..."
                   />
                 </div>
 
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 py-2">
-                  Send Message
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full bg-primary hover:bg-primary/90 py-2 disabled:opacity-50"
+                >
+                  {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
               </form>
             </div>

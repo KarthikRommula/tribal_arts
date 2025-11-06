@@ -10,6 +10,13 @@ export default function AboutPage() {
       <main className="min-h-screen py-12">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-12">
+            <div className="flex justify-center mb-6">
+              <img
+                src="/tribal_arts_logo.png"
+                alt="Tribal Arts Logo"
+                className="h-16 sm:h-20 w-auto"
+              />
+            </div>
             <h1 className="text-4xl font-bold mb-4">About Tribal Arts</h1>
             <p className="text-xl text-muted-foreground">
               Celebrating authentic indigenous craftsmanship and cultural heritage

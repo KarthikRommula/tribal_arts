@@ -4,8 +4,6 @@ import type React from "react"
 
 import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import Header from "@/components/header"
-import Footer from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
@@ -26,7 +24,7 @@ function SignUpForm() {
   const searchParams = useSearchParams()
   const { signUp } = useAuth()
 
-  const redirectTo = searchParams.get('redirect') || '/account'
+  const redirectTo = searchParams.get('redirect') || '/'
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -55,9 +53,18 @@ function SignUpForm() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center py-12">
+    <main className="min-h-screen flex items-center justify-center py-12 bg-background">
       <div className="w-full max-w-md px-4">
         <div className="bg-card border border-border rounded-lg p-8">
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <img
+              src="/tribal_arts_logo.png"
+              alt="Tribal Arts Logo"
+              className="h-12 w-auto"
+            />
+          </div>
+
           <h1 className="text-3xl font-bold mb-2">Create Account</h1>
           <p className="text-muted-foreground mb-8">
             Join Tribal Arts to access exclusive features and track your orders
@@ -159,30 +166,29 @@ function SignUpForm() {
 
 export default function SignUpPage() {
   return (
-    <>
-      <Header />
-      <Suspense fallback={
-        <main className="min-h-screen flex items-center justify-center py-12">
-          <div className="w-full max-w-md px-4">
-            <div className="bg-card border border-border rounded-lg p-8">
-              <div className="animate-pulse">
-                <div className="h-8 bg-muted rounded mb-2"></div>
-                <div className="h-4 bg-muted rounded mb-8"></div>
-                <div className="space-y-4">
-                  <div className="h-10 bg-muted rounded"></div>
-                  <div className="h-10 bg-muted rounded"></div>
-                  <div className="h-10 bg-muted rounded"></div>
-                  <div className="h-10 bg-muted rounded"></div>
-                  <div className="h-10 bg-muted rounded"></div>
-                </div>
+    <Suspense fallback={
+      <main className="min-h-screen flex items-center justify-center py-12 bg-background">
+        <div className="w-full max-w-md px-4">
+          <div className="bg-card border border-border rounded-lg p-8">
+            <div className="animate-pulse">
+              <div className="flex justify-center mb-6">
+                <div className="h-12 w-32 bg-muted rounded"></div>
+              </div>
+              <div className="h-8 bg-muted rounded mb-2"></div>
+              <div className="h-4 bg-muted rounded mb-8"></div>
+              <div className="space-y-4">
+                <div className="h-10 bg-muted rounded"></div>
+                <div className="h-10 bg-muted rounded"></div>
+                <div className="h-10 bg-muted rounded"></div>
+                <div className="h-10 bg-muted rounded"></div>
+                <div className="h-10 bg-muted rounded"></div>
               </div>
             </div>
           </div>
-        </main>
-      }>
-        <SignUpForm />
-      </Suspense>
-      <Footer />
-    </>
+        </div>
+      </main>
+    }>
+      <SignUpForm />
+    </Suspense>
   )
 }

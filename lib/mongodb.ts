@@ -50,3 +50,8 @@ export async function getWishlistCollection() {
   const { db } = await connectToDatabase()
   return db.collection("wishlists")
 }
+
+export async function getContactsCollection() {
+  const { db } = await connectToDatabase()
+  return db.collection("contacts")
+}

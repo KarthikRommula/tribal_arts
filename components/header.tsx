@@ -24,7 +24,7 @@ export default function Header() {
   const [showShopMenu, setShowShopMenu] = useState(false)
   const { itemCount } = useCart()
   const { itemCount: wishlistCount } = useWishlist()
-  const { user, signOut } = useAuth()
+  const { user, signOut, isAdmin } = useAuth()
 
   return (
     <header className="sticky top-0 z-50 bg-background border-b border-border">
@@ -131,6 +131,23 @@ export default function Header() {
                   <Link href="/orders" className="block px-4 py-2 text-sm hover:bg-secondary transition-colors">
                     My Orders
                   </Link>
+                  <Link href="/messages" className="block px-4 py-2 text-sm hover:bg-secondary transition-colors">
+                    My Messages
+                  </Link>
+                  {isAdmin() && (
+                    <>
+                      <div className="border-t border-border my-1"></div>
+                      <Link href="/admin/dashboard" className="block px-4 py-2 text-sm hover:bg-secondary transition-colors text-primary font-medium">
+                        Admin Dashboard
+                      </Link>
+                      <Link href="/admin/orders" className="block px-4 py-2 text-sm hover:bg-secondary transition-colors text-primary font-medium">
+                        Manage Orders
+                      </Link>
+                      <Link href="/admin/messages" className="block px-4 py-2 text-sm hover:bg-secondary transition-colors text-primary font-medium">
+                        Contact Messages
+                      </Link>
+                    </>
+                  )}
                   <button
                     onClick={() => {
                       signOut()
@@ -181,6 +198,24 @@ export default function Header() {
             <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors">
               Contact
             </Link>
+            
+            {/* Admin Links for Mobile */}
+            {user && isAdmin() && (
+              <div className="border-t border-border pt-4 mt-2">
+                <p className="text-sm font-semibold mb-2 text-muted-foreground">Admin</p>
+                <div className="flex flex-col gap-2 pl-2">
+                  <Link href="/admin/dashboard" className="text-sm font-medium hover:text-primary transition-colors text-primary" onClick={() => setIsOpen(false)}>
+                    Dashboard
+                  </Link>
+                  <Link href="/admin/orders" className="text-sm font-medium hover:text-primary transition-colors text-primary" onClick={() => setIsOpen(false)}>
+                    Manage Orders
+                  </Link>
+                  <Link href="/admin/messages" className="text-sm font-medium hover:text-primary transition-colors text-primary" onClick={() => setIsOpen(false)}>
+                    Contact Messages
+                  </Link>
+                </div>
+              </div>
+            )}
           </nav>
         )}
       </div>

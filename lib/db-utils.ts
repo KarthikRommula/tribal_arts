@@ -1,5 +1,8 @@
-import { getProductsCollection, getOrdersCollection, getUsersCollection, getCartCollection, getWishlistCollection } from "./mongodb"
+import { getProductsCollection, getOrdersCollection, getUsersCollection, getCartCollection, getWishlistCollection, getContactsCollection } from "./mongodb"
 import { ObjectId } from "mongodb"
+
+// Re-export collection getters for admin use
+export { getUsersCollection, getOrdersCollection }
 
 // Product functions
 export async function getProducts() {
@@ -7,7 +10,9 @@ export async function getProducts() {
     const products = await getProductsCollection()
     const dbProducts = await products.find({}).toArray()
     if (dbProducts.length === 0) {
-      throw new Error("No products found in database. Please seed the database first.")
+      // Don't throw an error, just return empty array
+      console.warn("No products found in database. Please seed the database first.")
+      return []
     }
     return dbProducts
   } catch (error) {
@@ -44,20 +49,36 @@ export async function createProduct(product: any) {
   return result
 }
 
+export async function updateProduct(id: string, updates: any) {
+  const products = await getProductsCollection()
+  const result = await products.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: { ...updates, updatedAt: new Date() } }
+  )
+  return result
+}
+
+export async function deleteProduct(id: string) {
+  const products = await getProductsCollection()
+  const result = await products.deleteOne({ _id: new ObjectId(id) })
+  return result
+}
+
 // Order functions
 export async function createOrder(order: any) {
   const orders = await getOrdersCollection()
   const result = await orders.insertOne({
     ...order,
     createdAt: new Date(),
-    status: "confirmed",
+    status: "confirmed", // Status is set here
   })
   return result
 }
 
 export async function getOrdersByEmail(email: string) {
   const orders = await getOrdersCollection()
-  return orders.find({ "customer.email": email }).toArray()
+  // Sort by newest first
+  return orders.find({ userEmail: email }).sort({ createdAt: -1 }).toArray()
 }
 
 export async function getOrderById(id: string) {
@@ -66,13 +87,32 @@ export async function getOrderById(id: string) {
 }
 
 // User functions
+
+//
+// --- *** FIXED: getUserByEmail *** ---
+// This function now EXCLUDES the password field for security.
+//
 export async function getUserByEmail(email: string) {
+  const users = await getUsersCollection()
+  return users.findOne({ email }, { projection: { password: 0 } })
+}
+// --- *** END FIX *** ---
+
+//
+// --- *** NEW: getUserForLogin *** ---
+// This function is ONLY for server-side auth routes.
+// It INCLUDES the password for comparison.
+//
+export async function getUserForLogin(email: string) {
   const users = await getUsersCollection()
   return users.findOne({ email })
 }
+// --- *** END NEW *** ---
+
 
 export async function createUser(user: any) {
   const users = await getUsersCollection()
+  // Password should be hashed *before* calling this function
   const result = await users.insertOne({
     ...user,
     createdAt: new Date(),
@@ -82,6 +122,10 @@ export async function createUser(user: any) {
 
 export async function updateUserProfile(email: string, updates: any) {
   const users = await getUsersCollection()
+  // Ensure password is not updated this way
+  if (updates.password) {
+    delete updates.password
+  }
   const result = await users.updateOne({ email }, { $set: { ...updates, updatedAt: new Date() } })
   return result
 }
@@ -126,4 +170,20 @@ export async function updateWishlist(userId: string, items: any[]) {
 export async function clearWishlist(userId: string) {
   const wishlists = await getWishlistCollection()
   return wishlists.deleteOne({ userId })
+}
+
+// Contact functions
+export async function createContactMessage(contactData: any) {
+  const contacts = await getContactsCollection()
+  const result = await contacts.insertOne({
+    ...contactData,
+    createdAt: new Date(),
+    status: "unread", // Status for admin to track
+  })
+  return result
+}
+
+export async function getContactMessages() {
+  const contacts = await getContactsCollection()
+  return contacts.find({}).sort({ createdAt: -1 }).toArray()
 }

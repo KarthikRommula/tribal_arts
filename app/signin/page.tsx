@@ -4,8 +4,6 @@ import type React from "react"
 
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import Header from "@/components/header"
-import Footer from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
@@ -19,9 +17,9 @@ function SignInForm() {
   const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { signIn } = useAuth()
+  const { signIn, isAdmin } = useAuth()
 
-  const redirectTo = searchParams.get('redirect') || '/account'
+  const redirectTo = searchParams.get('redirect') || '/'
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,8 +27,13 @@ function SignInForm() {
     setIsLoading(true)
 
     try {
-      await signIn(email, password)
-      router.push(redirectTo)
+      const isAdminUser = await signIn(email, password)
+      // Check if admin and redirect accordingly
+      if (isAdminUser) {
+        router.push('/admin/dashboard')
+      } else {
+        router.push(redirectTo)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to sign in")
     } finally {
@@ -39,9 +42,18 @@ function SignInForm() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center py-12">
+    <main className="min-h-screen flex items-center justify-center py-12 bg-background">
       <div className="w-full max-w-md px-4">
         <div className="bg-card border border-border rounded-lg p-8">
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <img
+              src="/tribal_arts_logo.png"
+              alt="Tribal Arts Logo"
+              className="h-12 w-auto"
+            />
+          </div>
+
           <h1 className="text-3xl font-bold mb-2">Sign In</h1>
           <p className="text-muted-foreground mb-8">Sign in to your account to view orders and manage your profile</p>
 
@@ -104,28 +116,27 @@ function SignInForm() {
 
 export default function SignInPage() {
   return (
-    <>
-      <Header />
-      <Suspense fallback={
-        <main className="min-h-screen flex items-center justify-center py-12">
-          <div className="w-full max-w-md px-4">
-            <div className="bg-card border border-border rounded-lg p-8">
-              <div className="animate-pulse">
-                <div className="h-8 bg-muted rounded mb-2"></div>
-                <div className="h-4 bg-muted rounded mb-8"></div>
-                <div className="space-y-4">
-                  <div className="h-10 bg-muted rounded"></div>
-                  <div className="h-10 bg-muted rounded"></div>
-                  <div className="h-10 bg-muted rounded"></div>
-                </div>
+    <Suspense fallback={
+      <main className="min-h-screen flex items-center justify-center py-12 bg-background">
+        <div className="w-full max-w-md px-4">
+          <div className="bg-card border border-border rounded-lg p-8">
+            <div className="animate-pulse">
+              <div className="flex justify-center mb-6">
+                <div className="h-12 w-32 bg-muted rounded"></div>
+              </div>
+              <div className="h-8 bg-muted rounded mb-2"></div>
+              <div className="h-4 bg-muted rounded mb-8"></div>
+              <div className="space-y-4">
+                <div className="h-10 bg-muted rounded"></div>
+                <div className="h-10 bg-muted rounded"></div>
+                <div className="h-10 bg-muted rounded"></div>
               </div>
             </div>
           </div>
-        </main>
-      }>
-        <SignInForm />
-      </Suspense>
-      <Footer />
-    </>
+        </div>
+      </main>
+    }>
+      <SignInForm />
+    </Suspense>
   )
 }

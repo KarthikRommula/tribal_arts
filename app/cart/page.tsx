@@ -7,9 +7,39 @@ import { Trash2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useCart } from "@/lib/cart-context"
 import RouteProtection from "@/components/route-protection"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, clearCart, total } = useCart()
+  const { toast } = useToast()
+
+  const handleRemoveItem = (id: string) => {
+    removeItem(id)
+    toast({
+      title: "Item Removed",
+      description: "Item has been removed from your cart.",
+    })
+  }
+
+  const handleUpdateQuantity = (id: string, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      handleRemoveItem(id)
+      return
+    }
+    updateQuantity(id, newQuantity)
+    toast({
+      title: "Quantity Updated",
+      description: `Quantity updated to ${newQuantity}.`,
+    })
+  }
+
+  const handleClearCart = () => {
+    clearCart()
+    toast({
+      title: "Cart Cleared",
+      description: "All items have been removed from your cart.",
+    })
+  }
 
   const subtotal = total
   const shipping = items.length > 0 ? 10 : 0
@@ -62,14 +92,14 @@ export default function CartPage() {
 
                         <div className="flex items-center gap-2 mt-4">
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
                             className="px-2 py-1 border border-border rounded hover:bg-secondary transition-colors"
                           >
                             -
                           </button>
                           <span className="w-8 text-center">{item.quantity}</span>
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
                             className="px-2 py-1 border border-border rounded hover:bg-secondary transition-colors"
                           >
                             +
@@ -79,7 +109,7 @@ export default function CartPage() {
 
                       <div className="flex flex-col items-end justify-between shrink-0">
                         <button
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => handleRemoveItem(item.id)}
                           className="p-2 text-destructive hover:bg-secondary rounded-lg transition-colors"
                         >
                           <Trash2 className="w-5 h-5" />

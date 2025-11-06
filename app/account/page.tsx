@@ -10,11 +10,13 @@ import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
 import RouteProtection from "@/components/route-protection"
 
 export default function AccountPage() {
   const router = useRouter()
   const { user, isLoading, updateProfile, signOut } = useAuth()
+  const { toast } = useToast()
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
@@ -24,7 +26,6 @@ export default function AccountPage() {
     state: "",
     zipCode: "",
   })
-  const [message, setMessage] = useState("")
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -50,11 +51,17 @@ export default function AccountPage() {
     e.preventDefault()
     try {
       await updateProfile(formData)
-      setMessage("Profile updated successfully!")
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been updated successfully!",
+      })
       setIsEditing(false)
-      setTimeout(() => setMessage(""), 3000)
     } catch (error) {
-      setMessage("Failed to update profile")
+      toast({
+        title: "Update Failed",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      })
     }
   }
 
@@ -127,12 +134,6 @@ export default function AccountPage() {
                       {isEditing ? "Cancel" : "Edit"}
                     </Button>
                   </div>
-
-                  {message && (
-                    <div className="bg-accent/20 border border-accent/30 text-accent-foreground px-4 py-3 rounded-lg mb-6 text-sm">
-                      {message}
-                    </div>
-                  )}
 
                   {isEditing ? (
                     <form onSubmit={handleSaveProfile} className="space-y-6">

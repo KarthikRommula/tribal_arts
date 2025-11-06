@@ -16,7 +16,7 @@ const SAMPLE_PRODUCTS = [
   },
   {
     name: "Woven Basket",
-    price: 3500,
+    price: 1500,
     image: "/traditional-woven-basket-tribal.jpg",
     category: "Home Decor",
     rating: 4.9,
@@ -27,7 +27,7 @@ const SAMPLE_PRODUCTS = [
   },
   {
     name: "Ethnic Textile Rug",
-    price: 12000,
+    price: 1200,
     image: "/tribal-ethnic-textile-rug.jpg",
     category: "Textiles",
     rating: 4.7,
@@ -38,7 +38,7 @@ const SAMPLE_PRODUCTS = [
   },
   {
     name: "Clay Pottery Set",
-    price: 4500,
+    price: 400,
     image: "/handmade-tribal-pottery-set.jpg",
     category: "Pottery",
     rating: 4.9,
@@ -49,7 +49,7 @@ const SAMPLE_PRODUCTS = [
   },
   {
     name: "Tribal Mask",
-    price: 6000,
+    price: 60,
     image: "/authentic-tribal-mask-art.jpg",
     category: "Art",
     rating: 4.6,
@@ -60,7 +60,7 @@ const SAMPLE_PRODUCTS = [
   },
   {
     name: "Leather Bag",
-    price: 4000,
+    price: 3000,
     image: "/tribal-leather-bag-handcrafted.jpg",
     category: "Accessories",
     rating: 4.8,

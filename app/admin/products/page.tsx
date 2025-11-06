@@ -388,7 +388,7 @@ export default function AdminProductsPage() {
                     <TableCell>
                       <Badge variant="outline">{product.category}</Badge>
                     </TableCell>
-                    <TableCell className="font-medium">${product.price}</TableCell>
+                    <TableCell className="font-medium">₹{product.price}</TableCell>
                     <TableCell>
                       <Badge variant={product.inStock ? "default" : "secondary"}>
                         {product.inStock ? "In Stock" : "Out of Stock"}

@@ -10,6 +10,7 @@ import { Heart, ShoppingCart, ChevronRight, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useCart } from "@/lib/cart-context"
 import { useWishlist } from "@/lib/wishlist-context"
+import { useToast } from "@/components/ui/use-toast"
 
 interface Product {
   _id: string
@@ -40,6 +41,7 @@ export default function ProductDetail() {
   const isInCart = !!cartItem
   const cartQuantity = cartItem?.quantity || 0
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist()
+  const { toast } = useToast()
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -113,6 +115,10 @@ export default function ProductDetail() {
     })
     setAddedToCart(true)
     setTimeout(() => setAddedToCart(false), 2000)
+    toast({
+      title: "Added to Cart",
+      description: `${product.name} has been added to your cart.`,
+    })
   }
 
   const handleUpdateQuantity = (newQuantity: number) => {
@@ -138,6 +144,10 @@ export default function ProductDetail() {
     if (isWishlisted) {
       removeFromWishlist(product._id)
       setIsWishlisted(false)
+      toast({
+        title: "Removed from Wishlist",
+        description: `${product.name} has been removed from your wishlist.`,
+      })
     } else {
       addToWishlist({
         id: product._id,
@@ -146,6 +156,10 @@ export default function ProductDetail() {
         image: product.image || "/placeholder.svg",
       })
       setIsWishlisted(true)
+      toast({
+        title: "Added to Wishlist",
+        description: `${product.name} has been added to your wishlist.`,
+      })
     }
   }
 

@@ -260,7 +260,7 @@ export default function AdminOrdersPage() {
                         <p className="text-sm text-gray-600">{order.customer?.email}</p>
                       </div>
                     </TableCell>
-                    <TableCell className="font-medium">${order.total}</TableCell>
+                    <TableCell className="font-medium">₹{order.total}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         {getStatusIcon(order.status)}
@@ -312,7 +312,7 @@ export default function AdminOrdersPage() {
             Showing {filteredOrders.length} of {orders.length} orders
           </span>
           <span>
-            Total Revenue: ${orders.reduce((sum, order) => sum + order.total, 0).toFixed(2)}
+            Total Revenue: ₹{orders.reduce((sum, order) => sum + order.total, 0).toFixed(2)}
           </span>
         </div>
       </div>

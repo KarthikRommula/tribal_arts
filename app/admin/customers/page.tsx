@@ -154,7 +154,7 @@ export default function AdminCustomersPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                ${customers.reduce((sum, c) => sum + (c.totalSpent || 0), 0).toFixed(2)}
+                ₹{customers.reduce((sum, c) => sum + (c.totalSpent || 0), 0).toFixed(2)}
               </div>
             </CardContent>
           </Card>
@@ -233,7 +233,7 @@ export default function AdminCustomersPage() {
                       <Badge variant="outline">{customer.orderCount || 0}</Badge>
                     </TableCell>
                     <TableCell className="font-medium">
-                      ${customer.totalSpent?.toFixed(2) || "0.00"}
+                      ₹{customer.totalSpent?.toFixed(2) || "0.00"}
                     </TableCell>
                     <TableCell>
                       {new Date(customer.createdAt).toLocaleDateString()}

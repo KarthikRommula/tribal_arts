@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog"
 import { useAuth } from "@/lib/auth-context"
 import { MessageSquare, Eye } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
 
 interface UserMessage {
   _id: string
@@ -35,10 +36,15 @@ interface UserMessage {
 
 export default function UserMessagesPage() {
   const { user, isLoading } = useAuth()
+  const { toast } = useToast()
   const [messages, setMessages] = useState<UserMessage[]>([])
   const [isLoadingMessages, setIsLoadingMessages] = useState(true)
   const [selectedMessage, setSelectedMessage] = useState<UserMessage | null>(null)
   const router = useRouter()
+
+  const getStatusBadgeVariant = (status: string) => {
+    return status === "unread" ? "destructive" : "secondary"
+  }
 
   const fetchMessages = async () => {
     if (!user) return
@@ -70,8 +76,18 @@ export default function UserMessagesPage() {
     }
   }, [user, isLoading, router])
 
-  const getStatusBadgeVariant = (status: string) => {
-    return status === "unread" ? "destructive" : "secondary"
+  const handleViewMessage = (message: UserMessage) => {
+    setSelectedMessage(message)
+    if (message.status === 'unread') {
+      toast({
+        title: "Message Marked as Read",
+        description: "This message has been marked as read.",
+      })
+      // Update local state to reflect read status
+      setMessages(prev => prev.map(msg => 
+        msg._id === message._id ? { ...msg, status: 'read' } : msg
+      ))
+    }
   }
 
   if (isLoading || isLoadingMessages) {
@@ -156,7 +172,7 @@ export default function UserMessagesPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setSelectedMessage(message)}
+                            onClick={() => handleViewMessage(message)}
                           >
                             <Eye className="h-4 w-4 mr-1" />
                             View

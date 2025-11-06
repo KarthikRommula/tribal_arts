@@ -4,10 +4,12 @@ import { useState, useEffect } from "react"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
 import { Button } from "@/components/ui/button"
+import { useToast } from "@/components/ui/use-toast"
 import { useAuth } from "@/lib/auth-context"
 
 export default function ContactPage() {
   const { user } = useAuth()
+  const { toast } = useToast()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -15,7 +17,6 @@ export default function ContactPage() {
     message: "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
 
   // Pre-fill form data when user is logged in
   useEffect(() => {
@@ -36,7 +37,6 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    setSubmitStatus("idle")
 
     try {
       const response = await fetch("/api/contact", {
@@ -51,14 +51,25 @@ export default function ContactPage() {
       const data = await response.json()
 
       if (response.ok && data.success) {
-        setSubmitStatus("success")
+        toast({
+          title: "Message Sent",
+          description: "Thank you for your message! We'll get back to you soon.",
+        })
         setFormData({ name: "", email: "", subject: "", message: "" })
       } else {
-        setSubmitStatus("error")
+        toast({
+          title: "Failed to Send",
+          description: "There was an error sending your message. Please try again.",
+          variant: "destructive",
+        })
       }
     } catch (error) {
       console.error("Error submitting contact form:", error)
-      setSubmitStatus("error")
+      toast({
+        title: "Error",
+        description: "There was an error sending your message. Please try again.",
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -115,18 +126,6 @@ export default function ContactPage() {
 
             <div className="bg-card border border-border rounded-lg p-8">
               <h2 className="text-2xl font-semibold mb-6">Send us a Message</h2>
-              
-              {submitStatus === "success" && (
-                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
-                  Thank you for your message! We'll get back to you soon.
-                </div>
-              )}
-              
-              {submitStatus === "error" && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                  Sorry, there was an error sending your message. Please try again.
-                </div>
-              )}
               
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>

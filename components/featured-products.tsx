@@ -7,6 +7,7 @@ import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCart } from "@/lib/cart-context"
 import { useWishlist } from "@/lib/wishlist-context"
+import { useToast } from "@/components/ui/use-toast"
 
 interface Product {
   _id: string
@@ -58,6 +59,7 @@ export default function FeaturedProducts() {
   const [error, setError] = useState<string | null>(null)
   const { addItem: addToCart } = useCart()
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlist()
+  const { toast } = useToast()
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -91,12 +93,20 @@ export default function FeaturedProducts() {
 
     if (isInWishlist(productId)) {
       removeFromWishlist(productId)
+      toast({
+        title: "Removed from Wishlist",
+        description: `${product.name} has been removed from your wishlist.`,
+      })
     } else {
       addToWishlist({
         id: productId,
         name: product.name,
         price: product.price,
         image: product.image,
+      })
+      toast({
+        title: "Added to Wishlist",
+        description: `${product.name} has been added to your wishlist.`,
       })
     }
   }
@@ -111,6 +121,10 @@ export default function FeaturedProducts() {
       price: product.price,
       image: product.image,
       quantity: 1,
+    })
+    toast({
+      title: "Added to Cart",
+      description: `${product.name} has been added to your cart.`,
     })
   }
   return (

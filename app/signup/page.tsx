@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
 
 function SignUpForm() {
   const [formData, setFormData] = useState({
@@ -23,6 +24,7 @@ function SignUpForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { signUp } = useAuth()
+  const { toast } = useToast()
 
   const redirectTo = searchParams.get('redirect') || '/'
 
@@ -36,7 +38,13 @@ function SignUpForm() {
     setError("")
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match")
+      const errorMessage = "Passwords do not match"
+      setError(errorMessage)
+      toast({
+        title: "Sign Up Failed",
+        description: errorMessage,
+        variant: "destructive",
+      })
       return
     }
 
@@ -44,9 +52,19 @@ function SignUpForm() {
 
     try {
       await signUp(formData.email, formData.password, formData.name)
+      toast({
+        title: "Account Created Successfully",
+        description: "Welcome! Your account has been created.",
+      })
       router.push(redirectTo)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to sign up")
+      const errorMessage = err instanceof Error ? err.message : "Failed to sign up"
+      setError(errorMessage)
+      toast({
+        title: "Sign Up Failed",
+        description: errorMessage,
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }

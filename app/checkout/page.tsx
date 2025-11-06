@@ -7,7 +7,7 @@ import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart-context";
 import Link from "next/link";
-import { ChevronLeft, Check, LogIn } from "lucide-react";
+import { ChevronLeft, Check, LogIn, X } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import RouteProtection from "@/components/route-protection";
@@ -23,6 +23,8 @@ export default function CheckoutPage() {
   const [orderId, setOrderId] = useState(""); // State to hold the new order ID
   const [orderTotal, setOrderTotal] = useState(0); // State to hold the order total
   const [isProcessing, setIsProcessing] = useState(false); // State for payment processing
+  const [paymentFailed, setPaymentFailed] = useState(false); // State for payment failure
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false); // State for Razorpay script loading
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -41,13 +43,34 @@ export default function CheckoutPage() {
     }
   }, [user, authLoading, items.length, router]);
 
+  // Check if Razorpay script is loaded
+  useEffect(() => {
+    const checkRazorpay = () => {
+      if (typeof window.Razorpay !== "undefined") {
+        setRazorpayLoaded(true);
+      }
+    };
+
+    // Check immediately
+    checkRazorpay();
+
+    // Also check after a short delay in case script loads asynchronously
+    const timer = setTimeout(checkRazorpay, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   // Pre-fill form with user data if available
   useEffect(() => {
-    if (user) {
+    if (user && user.name && user.email) {
+      const nameParts = user.name.trim().split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+
       setFormData((prev) => ({
         ...prev,
-        firstName: user.name?.split(" ")[0] || "",
-        lastName: user.name?.split(" ").slice(1).join(" ") || "",
+        firstName,
+        lastName,
         email: user.email || "",
         phone: user.phone || "",
         address: user.address || "",
@@ -132,6 +155,11 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (!razorpayLoaded) {
+      alert("Payment system is still loading. Please wait a moment and try again.");
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
@@ -149,6 +177,11 @@ export default function CheckoutPage() {
 
       if (!orderData.success) {
         throw new Error("Failed to create payment order");
+      }
+
+      // Check if Razorpay is loaded
+      if (typeof window.Razorpay === "undefined") {
+        throw new Error("Razorpay SDK not loaded. Please refresh the page and try again.");
       }
 
       // Step 2: Initialize Razorpay
@@ -210,11 +243,12 @@ export default function CheckoutPage() {
                 clearCart();
               }
             } else {
-              alert("Payment verification failed. Please contact support.");
+              console.error("Payment verification failed");
+              setPaymentFailed(true);
             }
           } catch (error) {
             console.error("Error processing payment:", error);
-            alert("Payment processing failed. Please try again.");
+            setPaymentFailed(true);
           } finally {
             setIsProcessing(false);
           }
@@ -231,7 +265,8 @@ export default function CheckoutPage() {
 
       const razorpay = new window.Razorpay(options);
       razorpay.on("payment.failed", function (response: any) {
-        alert("Payment failed: " + response.error.description);
+        console.error("Payment failed:", response.error?.description || response.error || response);
+        setPaymentFailed(true);
         setIsProcessing(false);
       });
       razorpay.open();
@@ -243,7 +278,7 @@ export default function CheckoutPage() {
   };
   // --- *** END RAZORPAY INTEGRATION *** ---
 
-  if (items.length === 0 && !orderPlaced) {
+  if (items.length === 0 && !orderPlaced && !paymentFailed) {
     // This return block is fine as-is
     return (
       <>
@@ -323,6 +358,42 @@ export default function CheckoutPage() {
                 <Link href="/products">
                   <Button variant="outline" className="w-full bg-transparent">
                     Continue Shopping
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (paymentFailed) {
+    return (
+      <>
+        <Header />
+        <main className="min-h-screen flex items-center justify-center">
+          <div className="max-w-md w-full mx-auto px-4">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <X className="w-8 h-8 text-red-600" />
+              </div>
+              <h1 className="text-3xl font-bold mb-2">Payment Failed</h1>
+              <p className="text-muted-foreground mb-8">
+                Unfortunately, your payment could not be processed. Please try again or contact support.
+              </p>
+
+              <div className="flex flex-col gap-3">
+                <Button
+                  onClick={() => setPaymentFailed(false)}
+                  className="w-full bg-primary hover:bg-primary/90"
+                >
+                  Try Again
+                </Button>
+                <Link href="/cart">
+                  <Button variant="outline" className="w-full bg-transparent">
+                    Return to Cart
                   </Button>
                 </Link>
               </div>
@@ -495,10 +566,10 @@ export default function CheckoutPage() {
 
                 <Button
                   type="submit"
-                  disabled={isProcessing}
+                  disabled={isProcessing || !razorpayLoaded}
                   className="w-full bg-primary hover:bg-primary/90 py-3 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isProcessing ? "Processing..." : "Proceed to Payment"}
+                  {isProcessing ? "Processing..." : !razorpayLoaded ? "Loading Payment..." : "Proceed to Payment"}
                 </Button>
               </form>
             </div>

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
 
 function SignInForm() {
   const [email, setEmail] = useState("")
@@ -18,6 +19,7 @@ function SignInForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { signIn, isAdmin } = useAuth()
+  const { toast } = useToast()
 
   const redirectTo = searchParams.get('redirect') || '/'
 
@@ -28,6 +30,10 @@ function SignInForm() {
 
     try {
       const isAdminUser = await signIn(email, password)
+      toast({
+        title: "Signed In Successfully",
+        description: "Welcome back!",
+      })
       // Check if admin and redirect accordingly
       if (isAdminUser) {
         router.push('/admin/dashboard')
@@ -35,7 +41,13 @@ function SignInForm() {
         router.push(redirectTo)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to sign in")
+      const errorMessage = err instanceof Error ? err.message : "Failed to sign in"
+      setError(errorMessage)
+      toast({
+        title: "Sign In Failed",
+        description: errorMessage,
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }

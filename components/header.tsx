@@ -2,8 +2,9 @@
 
 import Link from "next/link"
 import { Heart, ShoppingCart, Menu, X, LogOut, User, ChevronDown } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/lib/cart-context"
 import { useWishlist } from "@/lib/wishlist-context"
 import { useAuth } from "@/lib/auth-context"
@@ -22,9 +23,32 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showShopMenu, setShowShopMenu] = useState(false)
+  const [unreadMessages, setUnreadMessages] = useState(0)
   const { itemCount } = useCart()
   const { itemCount: wishlistCount } = useWishlist()
   const { user, signOut, isAdmin } = useAuth()
+
+  // Fetch unread messages count
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      if (!user?._id) return
+
+      try {
+        const response = await fetch(`/api/user/messages?userId=${user._id}`)
+        if (response.ok) {
+          const messages = await response.json()
+          const unreadCount = messages.filter((msg: any) => msg.status === 'unread').length
+          setUnreadMessages(unreadCount)
+        }
+      } catch (error) {
+        console.error('Error fetching unread messages:', error)
+      }
+    }
+
+    if (user) {
+      fetchUnreadCount()
+    }
+  }, [user])
 
   return (
     <header className="sticky top-0 z-50 bg-background border-b border-border">
@@ -131,8 +155,13 @@ export default function Header() {
                   <Link href="/orders" className="block px-4 py-2 text-sm hover:bg-secondary transition-colors">
                     My Orders
                   </Link>
-                  <Link href="/messages" className="block px-4 py-2 text-sm hover:bg-secondary transition-colors">
-                    My Messages
+                  <Link href="/messages" className="flex items-center justify-between px-4 py-2 text-sm hover:bg-secondary transition-colors">
+                    <span>My Messages</span>
+                    {unreadMessages > 0 && (
+                      <Badge variant="destructive" className="ml-2 text-xs">
+                        {unreadMessages}
+                      </Badge>
+                    )}
                   </Link>
                   {isAdmin() && (
                     <>

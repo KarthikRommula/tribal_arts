@@ -111,7 +111,7 @@ export default function AdminDashboard() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${stats?.totalRevenue || 0}</div>
+              <div className="text-2xl font-bold">₹{stats?.totalRevenue || 0}</div>
             </CardContent>
           </Card>
 
@@ -165,7 +165,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium">${order.total}</p>
+                      <p className="text-sm font-medium">₹{order.total}</p>
                       <Badge variant={order.status === 'completed' ? 'default' : 'secondary'} className="text-xs">
                         {order.status}
                       </Badge>

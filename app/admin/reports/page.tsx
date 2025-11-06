@@ -123,7 +123,7 @@ export default function AdminReportsPage() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${reportData?.totalRevenue.toLocaleString()}</div>
+              <div className="text-2xl font-bold">₹{reportData?.totalRevenue.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">
                 <span className="text-green-600 flex items-center">
                   <TrendingUp className="h-3 w-3 mr-1" />
@@ -174,7 +174,7 @@ export default function AdminReportsPage() {
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${reportData?.averageOrderValue.toFixed(2)}</div>
+              <div className="text-2xl font-bold">₹{reportData?.averageOrderValue.toFixed(2)}</div>
               <p className="text-xs text-muted-foreground">
                 <span className="text-red-600 flex items-center">
                   <TrendingDown className="h-3 w-3 mr-1" />
@@ -207,7 +207,7 @@ export default function AdminReportsPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">${product.revenue.toFixed(2)}</p>
+                      <p className="font-medium">₹{product.revenue.toFixed(2)}</p>
                     </div>
                   </div>
                 ))}
@@ -239,7 +239,7 @@ export default function AdminReportsPage() {
                     </div>
                     {activity.amount && (
                       <div className="text-right">
-                        <p className="text-sm font-medium">${activity.amount.toFixed(2)}</p>
+                        <p className="text-sm font-medium">₹{activity.amount.toFixed(2)}</p>
                       </div>
                     )}
                   </div>
@@ -262,7 +262,7 @@ export default function AdminReportsPage() {
                   {reportData?.monthlyRevenue.map((revenue, index) => (
                     <div key={index} className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Month {index + 1}</span>
-                      <span className="font-medium">${revenue.toLocaleString()}</span>
+                      <span className="font-medium">₹{revenue.toLocaleString()}</span>
                     </div>
                   ))}
                 </div>

@@ -8,10 +8,12 @@ import Link from "next/link"
 import { useWishlist } from "@/lib/wishlist-context"
 import { useCart } from "@/lib/cart-context"
 import RouteProtection from "@/components/route-protection"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function WishlistPage() {
   const { items, removeItem, clearWishlist } = useWishlist()
   const { addItem } = useCart()
+  const { toast } = useToast()
 
   const handleAddToCart = (item: any) => {
     addItem({
@@ -20,6 +22,26 @@ export default function WishlistPage() {
       price: item.price,
       image: item.image,
       quantity: 1,
+    })
+    toast({
+      title: "Added to Cart",
+      description: `${item.name} has been added to your cart.`,
+    })
+  }
+
+  const handleRemoveItem = (id: string) => {
+    removeItem(id)
+    toast({
+      title: "Removed from Wishlist",
+      description: "Item has been removed from your wishlist.",
+    })
+  }
+
+  const handleClearWishlist = () => {
+    clearWishlist()
+    toast({
+      title: "Wishlist Cleared",
+      description: "All items have been removed from your wishlist.",
     })
   }
 
@@ -39,7 +61,7 @@ export default function WishlistPage() {
               {items.length > 0 && (
                 <Button
                   variant="outline"
-                  onClick={clearWishlist}
+                  onClick={handleClearWishlist}
                   className="text-destructive hover:text-destructive"
                 >
                   Clear All
@@ -71,7 +93,7 @@ export default function WishlistPage() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => handleRemoveItem(item.id)}
                       className="absolute top-4 right-4 p-2 bg-background/80 backdrop-blur hover:bg-destructive hover:text-destructive-foreground rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                     >
                       <Trash2 className="w-5 h-5" />
@@ -91,7 +113,7 @@ export default function WishlistPage() {
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => handleRemoveItem(item.id)}
                         className="shrink-0"
                       >
                         <Heart className="w-4 h-4 fill-current" />

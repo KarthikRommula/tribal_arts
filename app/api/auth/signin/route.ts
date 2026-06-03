@@ -3,10 +3,6 @@ import { getUserForLogin } from "@/lib/db-utils"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 
-// Admin credentials - in production, store in database
-const ADMIN_EMAIL = "admin@tribalarts.com"
-const ADMIN_PASSWORD = "admin123"
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -16,11 +12,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Email and password are required" }, { status: 400 })
     }
 
+    // Admin credentials are read from environment variables. Fail closed if they are not configured.
+    const adminEmail = process.env.ADMIN_EMAIL
+    const adminPassword = process.env.ADMIN_PASSWORD
+
+    if (!adminEmail || !adminPassword) {
+      console.error("ADMIN_EMAIL and/or ADMIN_PASSWORD environment variables are not set")
+      return NextResponse.json({ success: false, error: "Server configuration error" }, { status: 500 })
+    }
+
     // Check for admin login first
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    if (email === adminEmail && password === adminPassword) {
       // Generate JWT token for admin
       const token = jwt.sign(
-        { email: ADMIN_EMAIL, role: "admin" },
+        { email: adminEmail, role: "admin" },
         process.env.JWT_SECRET || "your-secret-key",
         { expiresIn: "24h" }
       )
@@ -29,7 +34,7 @@ export async function POST(request: NextRequest) {
         success: true,
         data: {
           _id: "admin",
-          email: ADMIN_EMAIL,
+          email: adminEmail,
           name: "Admin",
           role: "admin"
         },

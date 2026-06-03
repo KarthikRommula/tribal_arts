@@ -148,10 +148,16 @@ JWT_SECRET=your-secret-key
 # Razorpay credentials
 NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxxxxx   # public key, sent to the browser
 RAZORPAY_KEY_SECRET=your-razorpay-secret         # server-side only
+
+# Admin login credentials (required — sign-in fails closed if these are not set)
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=change-me
 ```
 
-> Note: The default admin credentials are hard-coded in `app/api/auth/signin/route.ts`
-> (`admin@tribalarts.com` / `admin123`). Change these before any real deployment.
+> Note: Admin credentials are read from the `ADMIN_EMAIL` and `ADMIN_PASSWORD`
+> environment variables. If either is missing, admin sign-in is rejected with a
+> server configuration error. Set your own values in `.env.local` (see
+> `.env.example` for the full list of required variables).
 
 ## Usage
 
